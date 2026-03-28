@@ -1,0 +1,62 @@
+# ============================================================
+# NVIDIA Nemotron Reasoning Challenge - Training Config
+# ============================================================
+
+# --- Model ---
+model:
+  name: "nvidia/Nemotron-3-Nano-30B-A3B-BF16"
+  # On Kaggle, use the local path:
+  # name: "/kaggle/input/nemotron-3-nano-30b-a3b-bf16/transformers/default/1"
+  torch_dtype: "bfloat16"
+  load_in_4bit: true
+
+# --- LoRA ---
+lora:
+  r: 32
+  lora_alpha: 64
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  task_type: "CAUSAL_LM"
+
+# --- Data ---
+data:
+  train_file: "data/train.csv"
+  test_file: "data/test.csv"
+  max_seq_length: 4096
+  val_split: 0.05
+
+# --- Training ---
+training:
+  output_dir: "outputs/lora_adapter"
+  num_train_epochs: 3
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  lr_scheduler_type: "cosine"
+  logging_steps: 10
+  save_strategy: "epoch"
+  bf16: true
+  gradient_checkpointing: true
+  optim: "paged_adamw_8bit"
+  max_grad_norm: 1.0
+  seed: 42
+
+# --- Eval inference params (match competition metric) ---
+inference:
+  max_tokens: 7680
+  top_p: 1.0
+  temperature: 0.0
+  max_model_len: 8192
+
+# --- Submission ---
+submission:
+  output_path: "outputs/submission.zip"

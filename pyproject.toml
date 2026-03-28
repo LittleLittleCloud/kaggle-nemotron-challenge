@@ -1,0 +1,61 @@
+[project]
+name = "nemo"
+version = "0.1.0"
+description = "NVIDIA Nemotron Model Reasoning Challenge"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1.0",
+    "transformers>=4.45.0",
+    "peft>=0.13.0",
+    "trl>=0.12.0",
+    "datasets>=3.0.0",
+    "accelerate>=1.0.0",
+    "bitsandbytes>=0.44.0",
+    "pandas>=2.0.0",
+    "kaggle>=1.6.0",
+    "kagglehub>=0.3.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+vllm = ["vllm>=0.6.0"]
+unsloth = ["unsloth[colab-new]"]
+
+[project.scripts]
+nemo-download = "scripts.download_data:main"
+nemo-train = "scripts.train:main"
+nemo-eval = "scripts.evaluate:main"
+nemo-package = "scripts.package:main"
+
+[tool.ty]
+
+[tool.ty.src]
+exclude = ["notebooks/"]
+
+[tool.ty.environment]
+python-version = "3.13"
+python = ".venv"
+
+[tool.ty.rules]
+possibly-unresolved-reference = "ignore"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "scripts"]
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*" = ["E501"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.8",
+    "ty>=0.0.26",
+]
