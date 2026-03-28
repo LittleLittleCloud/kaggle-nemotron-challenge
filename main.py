@@ -9,6 +9,7 @@ Usage:
     python main.py package      # Package submission.zip
     python main.py submit       # Submit to Kaggle
     python main.py all          # Run full pipeline (download → train → package)
+    python main.py new-exp NAME  # Create experiment branch + tracking file
 """
 
 from __future__ import annotations
@@ -62,6 +63,18 @@ def cmd_submit(args):
     os.system(cmd)
 
 
+def cmd_new_exp(args):
+    """Create a new experiment branch and tracking file."""
+    from scripts.new_experiment import main as new_exp_main
+
+    sys.argv = ["new_experiment", args.name]
+    if args.title:
+        sys.argv += ["--title", args.title]
+    if args.no_checkout:
+        sys.argv.append("--no-checkout")
+    new_exp_main()
+
+
 def cmd_all(args):
     """Full pipeline: download → train → package."""
     print("=" * 60)
@@ -113,6 +126,12 @@ def main():
     p.add_argument("--submission", default="outputs/submission.zip")
     p.add_argument("--message", default=None)
 
+    # new-exp
+    p = sub.add_parser("new-exp", help="Create experiment branch + tracking file")
+    p.add_argument("name", help="Experiment name, e.g. sft-lr2e4")
+    p.add_argument("--title", default=None, help="Human-readable title")
+    p.add_argument("--no-checkout", action="store_true", help="Only create file")
+
     # all
     p = sub.add_parser("all", help="Full pipeline: download → train → package")
     p.add_argument("--config", default="configs/default.yaml")
@@ -132,6 +151,7 @@ def main():
         "eval": cmd_eval,
         "package": cmd_package,
         "submit": cmd_submit,
+        "new-exp": cmd_new_exp,
         "all": cmd_all,
     }
     commands[args.command](args)
