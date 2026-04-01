@@ -64,22 +64,7 @@ uv run kaggle kernels output bigmiao/nemo-baseline-v1 -p notebooks/output/
 
 ### Offline Packages
 
-The notebook installs offline wheels from `bigmiao/nemo-offline-packages`:
-- `datasets`, `trl` — not pre-installed on Kaggle
-- `nemo` — our library (`src/data.py`, `src/eval_utils.py`, `src/prompts.py`)
-
-To update:
-```bash
-# 1. Edit offline_packages/requirements.txt
-# 2. Download third-party wheels
-pip download --no-deps -r offline_packages/requirements.txt \
-    -d offline_packages/ \
-    --python-version 3.12 --platform manylinux2014_x86_64 --only-binary=:all:
-# 3. Rebuild nemo wheel
-uv build --wheel --out-dir offline_packages/
-# 4. Upload
-uv run kaggle datasets version -p offline_packages/ -m "<description>"
-```
+See [offline_packages/README.md](../offline_packages/README.md).
 
 ### Accelerator Values
 
