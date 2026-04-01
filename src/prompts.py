@@ -6,6 +6,9 @@ SYSTEM_PROMPT = (
     "Think step by step. Put your final answer within \\boxed{}."
 )
 
+# Suffix appended to prompts for competition metric format
+METRIC_SUFFIX = '\nPlease put your final answer inside `\\boxed{}`. For example: `\\boxed{your answer}`'
+
 
 # Chat template for training: produces the expected output format
 def format_chat_train(prompt: str, answer: str) -> list[dict[str, str]]:

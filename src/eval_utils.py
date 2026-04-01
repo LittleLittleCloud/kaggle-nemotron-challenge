@@ -88,3 +88,28 @@ def compute_accuracy(predictions: list[str], ground_truths: list[str]) -> dict[s
         "correct": correct,
         "total": total,
     }
+
+
+def correctness_reward(completions, answer, **kwargs) -> list[float]:
+    """GRPO reward function: score completions by correctness.
+
+    Returns:
+        +1.0 for correct \\boxed{} answer
+        +0.1 for wrong but has \\boxed{}
+        -0.5 for no \\boxed{} at all
+    """
+    rewards = []
+    for comp, gold in zip(completions, answer):
+        # trl 1.0 passes completions as list of message-dicts, not strings
+        if isinstance(comp, list):
+            comp = comp[-1]["content"] if comp else ""
+        elif isinstance(comp, dict):
+            comp = comp.get("content", "")
+        pred = extract_boxed_answer(comp)
+        if pred is not None and is_correct(pred, str(gold)):
+            rewards.append(1.0)
+        elif pred is not None:
+            rewards.append(0.1)
+        else:
+            rewards.append(-0.5)
+    return rewards

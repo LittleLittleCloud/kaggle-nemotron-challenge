@@ -9,6 +9,9 @@ data/
 outputs/
 *.zip
 
+# Offline packages (uploaded to Kaggle)
+offline_packages/*.whl
+
 # Python
 __pycache__/
 *.py[cod]
@@ -32,3 +35,9 @@ Thumbs.db
 *.safetensors
 *.bin
 *.pt
+
+output/
+offload/
+
+.ruff_cache/
+.venv/

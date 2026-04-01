@@ -41,6 +41,46 @@ python main.py all
 
 For running on Kaggle with GPU, use `notebooks/kaggle_e2e.ipynb`.
 
+The notebook installs `datasets`, `trl`, and the `nemo` library from offline wheels bundled in
+the `bigmiao/nemo-offline-packages` Kaggle dataset.
+
+### Offline Packages Workflow
+
+```bash
+# 1. Edit offline_packages/requirements.txt to add/update packages
+
+# 2. Download wheels (no-deps to avoid bundling torch etc.)
+pip download --no-deps -r offline_packages/requirements.txt \
+    -d offline_packages/ \
+    --python-version 3.12 --platform manylinux2014_x86_64 --only-binary=:all:
+
+# 3. Build the nemo library wheel
+uv build --wheel --out-dir offline_packages/
+
+# 4. Upload new dataset version to Kaggle
+uv run kaggle datasets version -p offline_packages/ -m "<description>"
+```
+
+The `kernel-metadata.json` references:
+- `competition_sources`: competition train/test CSVs
+- `dataset_sources`: `bigmiao/nemo-offline-packages` (offline wheels)
+- `model_sources`: `metric/nemotron-3-nano-30b-a3b-bf16`
+- `kernel_sources`: `ryanholbrook/nvidia-utility-script` (mamba_ssm, triton)
+
+### Accelerator (machine_shape) Values
+
+| Value | GPU | VRAM | Notes |
+|---|---|---|---|
+| `NvidiaRtxPro6000` | RTX PRO 6000 Blackwell | 96 GB | Supports bf16 |
+| `NvidiaTeslaT4` | Tesla T4 | 16 GB | fp16 only, no bf16 |
+| `NvidiaTeslaP100` | Tesla P100 | 16 GB | sm_60, incompatible with latest PyTorch |
+| `Tpu1VmV38` | TPU v3-8 | — | TPU |
+
+Push with accelerator:
+```bash
+uv run kaggle kernels push -p notebooks/ --accelerator NvidiaRtxPro6000     
+```
+
 ## Key Parameters (Competition Metric)
 
 | Parameter | Value |

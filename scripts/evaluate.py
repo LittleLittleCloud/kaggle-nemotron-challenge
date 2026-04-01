@@ -30,13 +30,16 @@ def evaluate(
     """Run local evaluation on a subset of training data."""
     cfg = load_config(config_path)
 
-    model_name = cfg["model"]["name"]
+    # Resolve model path
+    from scripts.train import resolve_model_path
+
+    model_path = resolve_model_path(cfg)
     if adapter_path is None:
         adapter_path = cfg["training"]["output_dir"]
 
-    print(f"Loading base model: {model_name}")
+    print(f"Loading base model: {model_path}")
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
+        model_path,
         torch_dtype=torch.bfloat16,
         device_map="auto",
         trust_remote_code=True,
@@ -46,7 +49,7 @@ def evaluate(
     model = PeftModel.from_pretrained(model, adapter_path)
     model.eval()
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
