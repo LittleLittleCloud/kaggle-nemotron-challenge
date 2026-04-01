@@ -18,13 +18,3 @@
 |---|---|---|---|---|
 | Baseline SFT-only | `exp/baseline-v1` | **0.60** | `sub-v39-lb0.60` | SFT 600 samples, GRPO disabled (OOM) |
 
-## Submission Log
-
-| # | Date | Kernel Ver | LB Score | Description |
-|---|---|---|---|---|
-| 1 | 2026-03-24 | v24 | 0.52 | Early baseline |
-| 2 | 2026-03-29 | v29 | 0.50 | — |
-| 3 | 2026-04-01 | v38 | 0.49 | — |
-| 4 | 2026-04-01 | v38 | 0.50 | — |
-| 5 | 2026-04-01 | v38 | 0.60 | Best score, accepted as baseline |
-| 6 | 2026-04-01 | v39 | pending | Submitted from local |

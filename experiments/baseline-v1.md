@@ -100,3 +100,14 @@ SFT warmup on Nemotron-3-Nano-30B with LoRA produces a working baseline submissi
 3. Use vLLM for generation (separate memory pool)
 4. Gradient checkpointing (if not already enabled)
 5. Combine 1+2 for ~5-7 GB total savings
+
+## Submission Log
+
+| # | Date | Kernel Ver | LB Score | Description |
+|---|---|---|---|---|
+| 1 | 2026-03-24 | v24 | 0.52 | Early baseline |
+| 2 | 2026-03-29 | v29 | 0.50 | — |
+| 3 | 2026-04-01 | v38 | 0.49 | — |
+| 4 | 2026-04-01 | v38 | 0.50 | — |
+| 5 | 2026-04-01 | v38 | 0.60 | Best score, accepted as baseline |
+| 6 | 2026-04-01 | v39 | pending | Submitted from local |
