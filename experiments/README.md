@@ -45,6 +45,52 @@ git merge exp/sft-lr2e4
 - 打 tag 记录分数，`git tag` 比文件记录更可靠
 - 不删失败分支，避免重复试错
 - `main` 只 merge 有提升的实验，保持 baseline 干净
+- 实验文件记录改动细节，方便回顾总结, update the readme from time to time, record the process of the experiment, and share the experience with others.
+
+## Kaggle Workflow
+
+### Push & Monitor
+
+```bash
+# Push notebook
+uv run kaggle kernels push -p notebooks/ --accelerator NvidiaRtxPro6000
+
+# Check status
+uv run kaggle kernels status bigmiao/nemo-baseline-v1
+
+# Pull logs after completion
+uv run kaggle kernels output bigmiao/nemo-baseline-v1 -p notebooks/output/
+```
+
+### Offline Packages
+
+The notebook installs offline wheels from `bigmiao/nemo-offline-packages`:
+- `datasets`, `trl` — not pre-installed on Kaggle
+- `nemo` — our library (`src/data.py`, `src/eval_utils.py`, `src/prompts.py`)
+
+To update:
+```bash
+# 1. Edit offline_packages/requirements.txt
+# 2. Download third-party wheels
+pip download --no-deps -r offline_packages/requirements.txt \
+    -d offline_packages/ \
+    --python-version 3.12 --platform manylinux2014_x86_64 --only-binary=:all:
+# 3. Rebuild nemo wheel
+uv build --wheel --out-dir offline_packages/
+# 4. Upload
+uv run kaggle datasets version -p offline_packages/ -m "<description>"
+```
+
+### Accelerator Values
+
+| `machine_shape` value | GPU | VRAM |
+|---|---|---|
+| `NvidiaRtxPro6000` | RTX PRO 6000 Blackwell | 96 GB |
+| `NvidiaTeslaT4` | Tesla T4 | 16 GB |
+| `NvidiaTeslaP100` | Tesla P100 | 16 GB |
+| `Tpu1VmV38` | TPU v3-8 | — |
+
+Use `--accelerator NvidiaRtxPro6000` with `kaggle kernels push`, or set `machine_shape` in `kernel-metadata.json`.
 
 ## Naming Convention
 

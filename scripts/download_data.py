@@ -6,22 +6,12 @@ import os
 import zipfile
 from pathlib import Path
 
+sys_path_hack = str(Path(__file__).resolve().parent.parent)
+import sys
 
-def _load_dotenv():
-    """Load .env file from project root if it exists."""
-    env_file = Path(__file__).resolve().parent.parent / ".env"
-    if not env_file.exists():
-        return
-    with open(env_file) as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            key, value = key.strip(), value.strip()
-            if value and key not in os.environ:
-                os.environ[key] = value
-
+if sys_path_hack not in sys.path:
+    sys.path.insert(0, sys_path_hack)
+from src.utils import load_dotenv
 
 COMPETITION = "nvidia-nemotron-model-reasoning-challenge"
 
@@ -32,7 +22,7 @@ def download_data(data_dir: str = "data") -> Path:
     Loads credentials from .env, then KAGGLE_USERNAME/KAGGLE_KEY env vars,
     or ~/.kaggle/kaggle.json.
     """
-    _load_dotenv()
+    load_dotenv()
     data_path = Path(data_dir)
     data_path.mkdir(parents=True, exist_ok=True)
 

@@ -4,9 +4,10 @@
 
 # --- Model ---
 model:
-  name: "nvidia/Nemotron-3-Nano-30B-A3B-BF16"
-  # On Kaggle, use the local path:
-  # name: "/kaggle/input/nemotron-3-nano-30b-a3b-bf16/transformers/default/1"
+  # Kaggle model hub ID (downloaded via kagglehub)
+  kaggle_model: "metric/nemotron-3-nano-30b-a3b-bf16/transformers/default"
+  # Override with a local path if already downloaded:
+  local_path: "/mnt/c/Users/xiaoyuz/.cache/kagglehub/models/metric/nemotron-3-nano-30b-a3b-bf16/transformers/default/1"
   torch_dtype: "bfloat16"
   load_in_4bit: true
 

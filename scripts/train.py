@@ -11,6 +11,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from src.utils import load_dotenv
+
+load_dotenv()
+
 import torch
 import yaml
 from peft import LoraConfig, TaskType, get_peft_model
@@ -22,9 +28,18 @@ from transformers import (
 )
 from trl import SFTTrainer
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.data import build_sft_dataset, load_train_csv
+
+# Monkey-patch Params4bit to accept _is_hf_initialized (transformers 5.x compat)
+import bitsandbytes as bnb
+
+_orig_params4bit_new = bnb.nn.Params4bit.__new__
+
+def _patched_params4bit_new(cls, *args, **kwargs):
+    kwargs.pop("_is_hf_initialized", None)
+    return _orig_params4bit_new(cls, *args, **kwargs)
+
+bnb.nn.Params4bit.__new__ = _patched_params4bit_new
 
 
 def load_config(config_path: str = "configs/default.yaml") -> dict:
@@ -32,10 +47,25 @@ def load_config(config_path: str = "configs/default.yaml") -> dict:
         return yaml.safe_load(f)
 
 
+def resolve_model_path(cfg: dict) -> str:
+    """Resolve model path: local_path > kaggle_model download."""
+    if cfg["model"].get("local_path"):
+        return cfg["model"]["local_path"]
+
+    kaggle_id = cfg["model"].get("kaggle_model")
+    if kaggle_id:
+        import kagglehub
+
+        print(f"Downloading model from Kaggle: {kaggle_id}")
+        return kagglehub.model_download(kaggle_id)
+
+    raise ValueError("Config must specify either model.local_path or model.kaggle_model")
+
+
 def setup_model_and_tokenizer(cfg: dict):
     """Load model with quantization and tokenizer."""
-    model_name = cfg["model"]["name"]
-    print(f"Loading model: {model_name}")
+    model_path = resolve_model_path(cfg)
+    print(f"Loading model: {model_path}")
 
     # Quantization config for 4-bit
     bnb_config = None
@@ -48,7 +78,7 @@ def setup_model_and_tokenizer(cfg: dict):
         )
 
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
+        model_path,
         quantization_config=bnb_config,
         torch_dtype=getattr(torch, cfg["model"].get("torch_dtype", "bfloat16")),
         device_map="auto",
@@ -56,7 +86,7 @@ def setup_model_and_tokenizer(cfg: dict):
     )
     model.config.use_cache = False
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         model.config.pad_token_id = tokenizer.eos_token_id
