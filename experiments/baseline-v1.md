@@ -71,3 +71,32 @@ SFT warmup on Nemotron-3-Nano-30B with LoRA produces a working baseline submissi
 - Kaggle dataset updates need ~2 min to propagate; push kernel after delay
 - trl 1.0 API differs from older versions: max_length not max_seq_length, completions are list-of-dicts
 - GRPO with num_generations=1 gives zero advantage (useless); minimum useful is 2
+
+## What's Working
+- SFT warmup with LoRA on Nemotron-3-Nano-30B produces reasonable outputs
+- Offline package pipeline (nemo wheel + datasets/trl) works on Kaggle
+- End-to-end pipeline: SFT → save adapter → generate → package → submit
+
+## Bottlenecks
+- **GRPO OOM**: Base model + LoRA + optimizer ≈ 74-76 GB; GRPO generation adds 15-20 GB → exceeds 95 GB
+- **SFT data**: Only 600 samples (100/type), likely underfitting
+- **No loss logging** in current notebook — hard to diagnose training dynamics
+
+## Next Experiments
+
+| Priority | Experiment | Hypothesis |
+|---|---|---|
+| P0 | Enable GRPO | RL alignment improves reasoning; need to solve OOM first |
+| P0 | More SFT data | 600 samples is likely too few; scale to 2k-5k |
+| P1 | Reduce LoRA rank to 16 | Saves ~3.5 GB VRAM, may enable GRPO |
+| P1 | Prompt engineering (CoT) | Better prompts → better base outputs |
+| P2 | Reduce max_completion_length | 256 instead of 512, save VRAM for GRPO |
+| P2 | vLLM generation | More efficient inference, may enable GRPO |
+| P3 | Data filtering/quality | Clean training data → fewer bad patterns |
+
+### GRPO OOM Mitigation Options
+1. Reduce LoRA rank 32→16 (~3.5 GB savings)
+2. Reduce `max_completion_length` 512→256
+3. Use vLLM for generation (separate memory pool)
+4. Gradient checkpointing (if not already enabled)
+5. Combine 1+2 for ~5-7 GB total savings
