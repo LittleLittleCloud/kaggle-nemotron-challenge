@@ -18,7 +18,7 @@ main                 ← 稳定 baseline，只接受验证过的改进
 # 1. 创建实验分支 + 追踪文件（一条命令搞定）
 uv run python main.py new-exp sft-lr2e4
 # → 创建 exp/sft-lr2e4 分支
-# → 创建 experiments/2026-03-28_sft-lr2e4.md
+# → 创建 experiments/sft-lr2e4.md
 # → 自动 commit
 
 # 2. 做实验，随时 commit（message 写关键参数）
@@ -79,7 +79,7 @@ Use `--accelerator NvidiaRtxPro6000` with `kaggle kernels push`, or set `machine
 
 ## Naming Convention
 
-`YYYY-MM-DD_<short-description>.md`
+`<branch-name>.md` — matches the experiment branch name, e.g. `baseline-v1.md` for `exp/baseline-v1`.
 
 ## Template
 
